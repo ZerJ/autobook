@@ -130,6 +130,18 @@ type BookSeatMap struct {
 	} `xml:"Section"`
 }
 type PerTime struct {
-	PidTime string `json:"pidTime"`
-	IdHall  string `json:"idHall"`
+	IdTime string `json:"idTime"`
+	IdHall string `json:"idHall"`
+}
+
+type Paypal struct {
+	D PaypalUrl `json:"d"`
+}
+type PaypalUrl struct {
+	Type                 string `json:"__type"`
+	Code                 int    `json:"code"`
+	Message              string `json:"message"`
+	EncryptCartID        string `json:"encryptCartID"`
+	EncryptPaypalOrderID string `json:"encryptPaypalOrderID"`
+	PaymentRedirectUrl   string `json:"paymentRedirectUrl"`
 }
