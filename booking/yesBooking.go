@@ -4,7 +4,7 @@
 * @Date  2023/7/14  17:26
 **/
 
-package query
+package booking
 
 import (
 	"autobook/logging"
@@ -21,10 +21,8 @@ import (
 	"strings"
 )
 
-var httpHeader map[string][]string
-
-// HttpQuerySeat 查询区域是否有票
-func HttpQuerySeat(idTime string, idHall string, block string) (pIdSeat string, class string) {
+// YesQuerySeat 查询区域是否有票
+func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, class string) {
 	if block == "" {
 		block = "0"
 	}
@@ -53,6 +51,7 @@ func HttpQuerySeat(idTime string, idHall string, block string) (pIdSeat string, 
 			seat, _ := strconv.Atoi(strings.Split(t[k], "@")[0])
 			if seat < minSeat {
 				minSeat = seat
+				logging.Info(seat)
 			}
 			class = strings.Split(t[k], "@")[5]
 			//fmt.Println("座位：" + seat + "可选")
@@ -63,8 +62,8 @@ func HttpQuerySeat(idTime string, idHall string, block string) (pIdSeat string, 
 	return pIdSeat, class
 }
 
-// HttpQueryLock 锁票
-func HttpQueryLock(idTime string, token string) (code string, message string, err error) {
+// YesQueryLock 锁票
+func YesQueryLock(idTime string, token string) (code string, message string, err error) {
 	params := url.Values{}
 	params.Add("name", `N202305102044370d4`)
 	params.Add("idTime", idTime)
@@ -92,8 +91,8 @@ func HttpQueryLock(idTime string, token string) (code string, message string, er
 
 }
 
-// HttpGetCart 获取付款信息
-func HttpGetCart(idPerf string, pIdSeat string, idTime string, pSeat string, amount int) (r PaypalUrl, err error) {
+// YesGetCart 获取付款信息
+func YesGetCart(idPerf string, pIdSeat string, idTime string, pSeat string, amount int) (r PaypalUrl, err error) {
 	var jsonData JSONData
 	var orderData OrderData
 	var d Paypal
@@ -163,8 +162,8 @@ func HttpGetCart(idPerf string, pIdSeat string, idTime string, pSeat string, amo
 
 }
 
-// HttpSeatMap 查询全图是否有票
-func HttpSeatMap(idTime string, idHall string) (blocks []string, err error) {
+// YesSeatMap 查询全图是否有票
+func YesSeatMap(idTime string, idHall string) (blocks []string, err error) {
 
 	var bookSeatMap BookSeatMap
 	params := url.Values{}
@@ -195,8 +194,8 @@ func HttpSeatMap(idTime string, idHall string) (blocks []string, err error) {
 	return blocks, nil
 }
 
-// HttpQuerySeatFlashEnd 获取pCntClass 为座位号跟着韩文
-func HttpQuerySeatFlashEnd(pIdTime string, pCntClass string) (pSeat string, price string, err error) {
+// YesQuerySeatFlashEnd 获取pCntClass 为座位号跟着韩文
+func YesQuerySeatFlashEnd(pIdTime string, pCntClass string) (pSeat string, price string, err error) {
 	params := url.Values{}
 	params.Add("pIdTime", pIdTime)
 	params.Add("PCntClass", pCntClass)
@@ -208,13 +207,14 @@ func HttpQuerySeatFlashEnd(pIdTime string, pCntClass string) (pSeat string, pric
 		return
 	}
 	doc := soup.HTMLParse(string(respByte))
+	fmt.Println(string(respByte))
 	root := doc.Find("div")
 	logging.Info(root.Attrs()["classbyte"]+"-1,", doc.Find("select").Attrs()["price"])
 	return root.Attrs()["classbyte"] + "-1,", doc.Find("select").Attrs()["price"], nil
 }
 
-// FnPerfTime 获取时间id 场馆id
-func FnPerfTime(pDay string, pIdPerf string) (PerTime, error) {
+// YesFnPerfTime 获取时间id 场馆id
+func YesFnPerfTime(pDay string, pIdPerf string) (PerTime, error) {
 	params := url.Values{}
 	params.Add("pDay", pDay)
 	params.Add("pIdPerf", pIdPerf)
@@ -235,8 +235,8 @@ func FnPerfTime(pDay string, pIdPerf string) (PerTime, error) {
 	return vs, err
 }
 
-// FnEtcFree 获取手续费fee
-func FnEtcFree(pIdTime string) (fee string, err error) {
+// YesFnEtcFree 获取手续费fee
+func YesFnEtcFree(pIdTime string) (fee string, err error) {
 
 	params := url.Values{}
 	params.Add("pIdTime", pIdTime)
@@ -286,7 +286,7 @@ func httpQuery(contentType string, urls string, body io.Reader) (respByte []byte
 	respByte, err = ioutil.ReadAll(resp.Body)
 	return respByte, nil
 }
-func PaypalPayResponse(cartID string, orderId string, token string) {
+func YesPaypalPayResponse(cartID string, orderId string, token string) {
 	params := url.Values{}
 	params.Add("paypalCartID", cartID)
 	params.Add("paypalOrderID", orderId)

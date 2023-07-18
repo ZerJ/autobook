@@ -1,8 +1,10 @@
 package main
 
 import (
+	"autobook/booking"
+
 	"autobook/logging"
-	"autobook/query"
+
 	"fmt"
 	"strconv"
 	"time"
@@ -16,21 +18,21 @@ func main() {
 	//query.PaypalPayResponse(url.EncryptCartID, url.EncryptPaypalOrderID, url.EncryptPaypalOrderID)
 }
 
-func bookYes24(day string, idPerf string) query.PaypalUrl {
-	var payData query.PaypalUrl
-	times, err := query.FnPerfTime(day, idPerf)
+func bookYes24(day string, idPerf string) booking.PaypalUrl {
+	var payData booking.PaypalUrl
+	times, err := booking.YesFnPerfTime(day, idPerf)
 	if err != nil {
 		logging.Error(err)
 	}
 	for {
-		blocks, err := query.HttpSeatMap(times.IdTime, times.IdHall)
+		blocks, err := booking.YesSeatMap(times.IdTime, times.IdHall)
 		if err != nil {
 			continue
 		}
 		if len(blocks) > 0 {
-			pidSeat, class := query.HttpQuerySeat(times.IdTime, times.IdHall, blocks[0])
+			pidSeat, class := booking.YesQuerySeat(times.IdTime, times.IdHall, blocks[0])
 
-			code, message, err := query.HttpQueryLock(times.IdTime, pidSeat)
+			code, message, err := booking.YesQueryLock(times.IdTime, pidSeat)
 			if err != nil {
 				logging.Error(err)
 				continue
@@ -38,12 +40,12 @@ func bookYes24(day string, idPerf string) query.PaypalUrl {
 			if code != "None" || message != "요청하신 작업이 정상적으로 처리 되었습니다" {
 				continue
 			}
-			pSeat, price, err := query.HttpQuerySeatFlashEnd(times.IdTime, class)
+			pSeat, price, err := booking.YesQuerySeatFlashEnd(times.IdTime, class)
 			if err != nil {
 				logging.Error(err)
 				continue
 			}
-			fee, err := query.FnEtcFree(times.IdTime)
+			fee, err := booking.YesFnEtcFree(times.IdTime)
 			if err != nil {
 				logging.Error(err)
 				continue
@@ -51,7 +53,8 @@ func bookYes24(day string, idPerf string) query.PaypalUrl {
 			amountFee, _ := strconv.Atoi(fee)
 			amountPrice, _ := strconv.Atoi(price)
 			amount := amountFee + amountPrice
-			payData, err = query.HttpGetCart(idPerf, pidSeat, times.IdTime, pSeat, amount)
+
+			payData, err = booking.YesGetCart(idPerf, pidSeat, times.IdTime, pSeat, amount)
 			if err != nil {
 				logging.Error(err)
 				continue

@@ -4,7 +4,7 @@
 * @Date  2023/7/14  17:26
 **/
 
-package query
+package booking
 
 import "encoding/xml"
 

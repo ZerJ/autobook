@@ -37,7 +37,6 @@ const (
 
 func init() {
 	filePath := getLogFileFullPath()
-	fmt.Println(filePath)
 	F = openLogFile(filePath)
 
 	logger = log.New(F, DefaultPrefix, log.LstdFlags)
