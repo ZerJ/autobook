@@ -207,10 +207,16 @@ func YesQuerySeatFlashEnd(pIdTime string, pCntClass string) (pSeat string, price
 		return
 	}
 	doc := soup.HTMLParse(string(respByte))
-	fmt.Println(string(respByte))
 	root := doc.Find("div")
-	logging.Info(root.Attrs()["classbyte"]+"-1,", doc.Find("select").Attrs()["price"])
-	return root.Attrs()["classbyte"] + "-1,", doc.Find("select").Attrs()["price"], nil
+	if strings.Contains(string(respByte), "classbyte") && strings.Contains(string(respByte), "price") {
+		logging.Info(root.Attrs()["classbyte"]+"-1,", doc.Find("select").Attrs()["price"])
+		return root.Attrs()["classbyte"] + "-1,", doc.Find("select").Attrs()["price"], nil
+	} else {
+		fmt.Println(string(respByte))
+
+		return "", "", fmt.Errorf("发生一些错误")
+	}
+
 }
 
 // YesFnPerfTime 获取时间id 场馆id
@@ -229,8 +235,14 @@ func YesFnPerfTime(pDay string, pIdPerf string) (PerTime, error) {
 	doc := soup.HTMLParse(string(respByte))
 	root := doc.Find("li")
 	var vs PerTime
-	vs.IdHall = root.Attrs()["idhall"]
-	vs.IdTime = root.Attrs()["value"]
+	if strings.Contains(string(respByte), "idhall") && strings.Contains(string(respByte), "value") {
+		vs.IdHall = root.Attrs()["idhall"]
+		vs.IdTime = root.Attrs()["value"]
+	} else {
+		fmt.Println(string(respByte))
+		return vs, fmt.Errorf("发生一些错误")
+	}
+
 	logging.Info(" 获取时间场馆成功 idHall:" + vs.IdHall + ",idTime:" + vs.IdTime)
 	return vs, err
 }
