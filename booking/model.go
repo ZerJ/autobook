@@ -145,3 +145,9 @@ type PaypalUrl struct {
 	EncryptPaypalOrderID string `json:"encryptPaypalOrderID"`
 	PaymentRedirectUrl   string `json:"paymentRedirectUrl"`
 }
+
+type BlockInfo struct {
+	Block string `json:"block"`
+	Class string `json:"class"`
+	Seat  string `json:"seat"`
+}

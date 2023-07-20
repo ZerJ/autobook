@@ -47,7 +47,7 @@ func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, c
 	}
 	//fmt.Println(b.BlockSeat)
 	//defer resp.Body.Close()
-	minSeat := 9999999
+	minSeat := 99999999
 	t := strings.Split(b.BlockSeat.Text, "^")
 	for k, _ := range t {
 		if len(strings.Split(t[k], "@")) == 8 {
@@ -62,7 +62,10 @@ func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, c
 		}
 
 	}
-	pIdSeat = strconv.Itoa(minSeat)
+	if minSeat != 99999999 {
+		pIdSeat = strconv.Itoa(minSeat)
+	}
+
 	logging.Info(pIdSeat)
 	return pIdSeat, class
 }
@@ -186,6 +189,7 @@ func YesSeatMap(idTime string, idHall string) (blocks []string, err error) {
 		blockStr := strings.Split(bookSeatMap.BlockRemain.Text, "^")
 		for _, v := range blockStr {
 			if strings.Contains(v, "@") {
+				fmt.Println(v)
 				if strings.Split(v, "@")[1] != "0" {
 					blocks = append(blocks, strings.Split(v, "@")[0])
 				}
@@ -197,6 +201,37 @@ func YesSeatMap(idTime string, idHall string) (blocks []string, err error) {
 		logging.Info("无票")
 	}
 	return blocks, nil
+}
+
+// GetBlockInfo 查询全图是否有票
+func GetBlockInfo(idTime string, idHall string) (blockInfo []BlockInfo, err error) {
+
+	var bookSeatMap BookSeatMap
+	params := url.Values{}
+	params.Add("idHall", idHall)
+	params.Add("idTime", idTime)
+	body := strings.NewReader(params.Encode())
+	logging.Info("开始查询全图是否有票")
+	respByte, err := httpQuery("application/x-www-form-urlencoded", "http://ticket.yes24.com/OSIF/Book.asmx/GetHallMapRemainFN", body)
+
+	err = xml.Unmarshal(respByte, &bookSeatMap)
+	if err != nil {
+		fmt.Println(err)
+	}
+	if len(bookSeatMap.Section.Text) > 0 {
+		blockStr := strings.Split(bookSeatMap.Section.Text, "^")
+		for k, v := range blockStr {
+			if strings.Contains(v, "@") {
+				var info BlockInfo
+				info.Block = strings.Split(blockStr[k], "@")[1]
+				info.Class = strings.Split(blockStr[k], "@")[0]
+				info.Seat = strings.Split(blockStr[k], "@")[2]
+				blockInfo = append(blockInfo, info)
+			}
+
+		}
+	}
+	return blockInfo, nil
 }
 
 // YesQuerySeatFlashEnd 获取pCntClass 为座位号跟着韩文
