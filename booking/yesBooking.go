@@ -21,6 +21,10 @@ import (
 	"strings"
 )
 
+var cookie = "_gcl_au=1.1.1231468339.1682498612; PCID=16824986121042670196551; _fbp=fb.1.1682498612158.2133767039; _ga=GA1.2.950941543.1684314475; __utmz=186092716.1684314477.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); __utmz=12748607.1684742639.7.6.utmcsr=ticket.yes24.com|utmccn=(referral)|utmcmd=referral|utmcct=/; _ga_D2E1MGEBZ0=GS1.2.1688973343.1.0.1688973343.0.0.0; _ga_FJT6RQ6VPQ=GS1.1.1688973343.1.0.1688973347.56.0.0; _ga_719LSSZFC3=GS1.2.1688973350.2.0.1688973350.60.0.0; ASP.NET_SessionId=qso151itzfpxluze1pugy34c; __utma=186092716.950941543.1684314475.1689328288.1689557033.23; __utmc=186092716; YesTicketForeign=UserNO=110,102,26,136,66,40,120,110,163,226,100,218,234,4,189,224,179,184,98,94,173,28,97,118&UserName=240,182,179,206,18,126,109,145,240,119,125,254,191,231,103,112&Email=151,119,148,171,46,152,30,109,34,43,84,119,228,11,89,115,46,204,50,88,151,16,88,210&UserIdentiNumber=34,252,37,77,253,140,131,5,119,19,107,151,32,170,87,20&Phone=245,54,43,158,39,91,228,116&Mobile=245,54,43,158,39,91,228,116&IdType=60,171,81,93,255,57,213,127&MobileType=195,31,27,161,165,198,213,175&ServiceCookie=19,241,128,239,156,57,68,1,5,233,199,48,224,104,94,18,213,148,190,111,214,23,113,158,73,238,255,156,69,181,213,147,84,37,178,209,147,174,192,74,106,170,8,161,150,128,13,40; HTTP_REFERER=http://ticket.yes24.com/; RecentViewGoods=; RecentViewInfo=NotCookie%3DY%26Interval%3D5; __utmt=1; __utmb=186092716.28.10.1689557033; WaitKey=D99E66092D0F5997A926BA53D895ECD7763C590C43AD0881FF848C5A7871888EC6A53C9157644DB6F28046AC6D5A822DCE765AEEA99B4B29A86A1ED1D7312B9082022A2343795F167EE071C5AFBF38F875321161929FA87411C5FCAE33BF853600390DD2AC19D3F88653708CDEFE56EF302C30; NetFunnel_ID=5003%3A201%3Akey%3DD99E66092D0F5997A926BA53D895ECD7763C590C43AD0881FF848C5A7871888E132D9FBA7B7802EB7284171CB6164440CE765AEEA99B4B29A86A1ED1D7312B9082022A2343795F167EE071C5AFBF38F875321161929FA87411C5FCAE33BF85363ABC0CF91CAD74559E4AAEBE23F15028302C30%26nwait%3D0%26nnext%3D0%26tps%3D0.000000%26ttl%3D10%26ip%3Dtkwait.yes24.com%26port%3D443"
+var idCustomer = "N202305102044370d4"
+var userNo = "UserNO=110,102,26,136,66,40,120,110,163,226,100,218,234,4,189,224,179,184,98,94,173,28,97,118&UserName=240,182,179,206,18,126,109,145,240,119,125,254,191,231,103,112&Email=151,119,148,171,46,152,30,109,34,43,84,119,228,11,89,115,46,204,50,88,151,16,88,210&UserIdentiNumber=34,252,37,77,253,140,131,5,119,19,107,151,32,170,87,20&Phone=245,54,43,158,39,91,228,116&Mobile=245,54,43,158,39,91,228,116&IdType=60,171,81,93,255,57,213,127&MobileType=195,31,27,161,165,198,213,175&ServiceCookie=42,188,239,213,123,124,229,110,132,83,97,115,6,141,181,147,184,4,233,206,43,136,157,144,40,140,4,122,54,46,241,86,215,42,118,128,11,247,100,124,135,23,204,210,226,29,59,247"
+
 // YesQuerySeat 查询区域是否有票
 func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, class string) {
 	if block == "" {
@@ -31,7 +35,7 @@ func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, c
 	params.Add("idTime", idTime)
 	params.Add("block", block)
 	params.Add("channel", `1`)
-	params.Add("idCustomer", `N202305102044370d4`)
+	params.Add("idCustomer", idCustomer)
 	params.Add("idOrg", `1`)
 	body := strings.NewReader(params.Encode())
 	logging.Info("开始查询区域是否有票")
@@ -59,16 +63,17 @@ func YesQuerySeat(idTime string, idHall string, block string) (pIdSeat string, c
 
 	}
 	pIdSeat = strconv.Itoa(minSeat)
+	logging.Info(pIdSeat)
 	return pIdSeat, class
 }
 
 // YesQueryLock 锁票
-func YesQueryLock(idTime string, token string) (code string, message string, err error) {
+func YesQueryLock(idTime string, token string, block string) (code string, message string, err error) {
 	params := url.Values{}
-	params.Add("name", `N202305102044370d4`)
+	params.Add("name", idCustomer)
 	params.Add("idTime", idTime)
 	params.Add("token", token)
-	params.Add("Block", `0`)
+	params.Add("Block", block)
 	body := strings.NewReader(params.Encode())
 	//payloadBytes, err := json.Marshal(data)
 	//if err != nil {
@@ -136,7 +141,7 @@ func YesGetCart(idPerf string, pIdSeat string, idTime string, pSeat string, amou
 	orderData.ReceiptNo = ""
 	orderData.OKCashbagCardNo = ""
 	orderData.IsYesPointYN = "N"
-	orderData.YesTicketForeign = "UserNO=110,102,26,136,66,40,120,110,163,226,100,218,234,4,189,224,179,184,98,94,173,28,97,118&UserName=240,182,179,206,18,126,109,145,240,119,125,254,191,231,103,112&Email=151,119,148,171,46,152,30,109,34,43,84,119,228,11,89,115,46,204,50,88,151,16,88,210&UserIdentiNumber=34,252,37,77,253,140,131,5,119,19,107,151,32,170,87,20&Phone=245,54,43,158,39,91,228,116&Mobile=245,54,43,158,39,91,228,116&IdType=60,171,81,93,255,57,213,127&MobileType=195,31,27,161,165,198,213,175&ServiceCookie=42,188,239,213,123,124,229,110,132,83,97,115,6,141,181,147,184,4,233,206,43,136,157,144,40,140,4,122,54,46,241,86,215,42,118,128,11,247,100,124,135,23,204,210,226,29,59,247"
+	orderData.YesTicketForeign = userNo
 	orderData.PayMethod = "100000000000"
 	orderData.GoodName = "공연티켓상품"
 	orderData.Amount = amount
@@ -213,7 +218,7 @@ func YesQuerySeatFlashEnd(pIdTime string, pCntClass string) (pSeat string, price
 		return root.Attrs()["classbyte"] + "-1,", doc.Find("select").Attrs()["price"], nil
 	} else {
 		fmt.Println(string(respByte))
-
+		fmt.Println(pIdTime)
 		return "", "", fmt.Errorf("发生一些错误")
 	}
 

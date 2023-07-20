@@ -12,8 +12,8 @@ import (
 
 func main() {
 	//yes24 订票
-	//url := bookYes24("20230731", "46462")
-	url := bookYes24("20230829", "46107")
+	url := bookYes24("20230826", "46406")
+	//url := bookYes24("20230829", "46107")
 	fmt.Println(url)
 	//付款回执
 	//query.PaypalPayResponse(url.EncryptCartID, url.EncryptPaypalOrderID, url.EncryptPaypalOrderID)
@@ -34,7 +34,7 @@ func bookYes24(day string, idPerf string) booking.PaypalUrl {
 		if len(blocks) > 0 {
 			pidSeat, class := booking.YesQuerySeat(times.IdTime, times.IdHall, blocks[0])
 
-			code, message, err := booking.YesQueryLock(times.IdTime, pidSeat)
+			code, message, err := booking.YesQueryLock(times.IdTime, pidSeat, blocks[0])
 			if err != nil {
 				logging.Error(err)
 				continue
