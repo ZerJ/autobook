@@ -189,7 +189,6 @@ func YesSeatMap(idTime string, idHall string) (blocks []string, err error) {
 		blockStr := strings.Split(bookSeatMap.BlockRemain.Text, "^")
 		for _, v := range blockStr {
 			if strings.Contains(v, "@") {
-				fmt.Println(v)
 				if strings.Split(v, "@")[1] != "0" {
 					blocks = append(blocks, strings.Split(v, "@")[0])
 				}
