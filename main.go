@@ -12,12 +12,27 @@ import (
 
 func main() {
 	//yes24 订票
-	url := bookYes24("20230722", "46237")
-	//url := book("20230722", "46237")
-	//url := bookYes24("20230829", "46107")
-	fmt.Println(url)
+	for {
+		//url := bookYes24("20230812", "46558")
+		url := bookYes24("20231025", "46305")
+		if len(url.EncryptPaypalOrderID) > 0 {
+			fmt.Println(url)
+			break
+		}
+		time.Sleep(time.Duration(10) * time.Millisecond)
+	}
+
+	//booking.InitRedis()
+
+	//cmd:=booking.Redisclient.Set("encryptCartID",url.EncryptCartID,time.Duration(60) * time.Second)
+	//fmt.Println(cmd.Err())
+	//c:=booking.Redisclient.Set("encryptPaypalOrderID",url.EncryptPaypalOrderID,time.Duration(60) * time.Second)
+	//fmt.Println(c.Err())
+
 	//付款回执
-	//query.PaypalPayResponse(url.EncryptCartID, url.EncryptPaypalOrderID, url.EncryptPaypalOrderID)
+	//encryptCartID,_:=booking.Redisclient.Get("encryptCartID").Result()
+	//encryptPaypalOrderID,_:=booking.Redisclient.Get("encryptPaypalOrderID").Result()
+	//booking.YesPaypalPayResponse(encryptCartID, encryptPaypalOrderID, encryptPaypalOrderID)
 }
 
 func bookYes24(day string, idPerf string) booking.PaypalUrl {
@@ -35,7 +50,7 @@ func bookYes24(day string, idPerf string) booking.PaypalUrl {
 		}
 		if len(blocks) > 0 {
 			pidSeat, class := booking.YesQuerySeat(times.IdTime, times.IdHall, blocks[0])
-
+			logging.Info("选择的座位：" + pidSeat)
 			code, message, err := booking.YesQueryLock(times.IdTime, pidSeat, blocks[0])
 			if err != nil {
 				logging.Error(err)
@@ -49,15 +64,19 @@ func bookYes24(day string, idPerf string) booking.PaypalUrl {
 				logging.Error(err)
 				continue
 			}
-			fee, err := booking.YesFnEtcFree(times.IdTime)
-			if err != nil {
-				logging.Error(err)
-				continue
-			}
-			amountFee, _ := strconv.Atoi(fee)
+			fmt.Println(price)
+			//fee, err := booking.YesFnEtcFree(times.IdTime)
+			//if err != nil {
+			//	logging.Error(err)
+			//	continue
+			//}
+			//amountFee, _ := strconv.Atoi(fee)
 			amountPrice, _ := strconv.Atoi(price)
-			amount := amountFee + amountPrice
-			fmt.Println(pSeat, pidSeat)
+			//amount := amountFee + amountPrice
+			//fmt.Println(pSeat, pidSeat)
+			//pSeat:="T192$252$188$174-1,"
+			amount := amountPrice + 2000
+			fmt.Println(amount)
 			payData, err = booking.YesGetCart(idPerf, pidSeat, times.IdTime, pSeat, amount)
 			if err != nil {
 				logging.Error(err)
