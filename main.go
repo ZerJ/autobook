@@ -11,10 +11,12 @@ import (
 )
 
 func main() {
-	//yes24 订票
+	booking.InitRedis()
+	var url booking.PaypalUrl
+
 	for {
-		//url := bookYes24("20230812", "46558")
-		url := bookYes24("20231025", "46305")
+		url = bookYes24("20230812", "46558")
+		//url := bookYes24("20230812", "46560")
 		if len(url.EncryptPaypalOrderID) > 0 {
 			fmt.Println(url)
 			break
@@ -22,17 +24,22 @@ func main() {
 		time.Sleep(time.Duration(10) * time.Millisecond)
 	}
 
-	//booking.InitRedis()
+	cmd := booking.Redisclient.Set("encryptCartID", url.EncryptCartID, time.Duration(60)*time.Second)
+	fmt.Println(cmd.Err(), url.EncryptCartID)
+	c := booking.Redisclient.Set("encryptPaypalOrderID", url.EncryptPaypalOrderID, time.Duration(60)*time.Second)
+	fmt.Println(c.Err(), url.EncryptPaypalOrderID)
+	//payPal()
 
-	//cmd:=booking.Redisclient.Set("encryptCartID",url.EncryptCartID,time.Duration(60) * time.Second)
-	//fmt.Println(cmd.Err())
-	//c:=booking.Redisclient.Set("encryptPaypalOrderID",url.EncryptPaypalOrderID,time.Duration(60) * time.Second)
-	//fmt.Println(c.Err())
+}
+func payPal() {
+	encryptCartID, _ := booking.Redisclient.Get("encryptCartID").Result()
+	encryptPaypalOrderID, _ := booking.Redisclient.Get("encryptPaypalOrderID").Result()
+	if len(encryptCartID) > 0 {
+		booking.YesPaypalPayResponse(encryptCartID, encryptPaypalOrderID, encryptPaypalOrderID)
+	} else {
+		fmt.Println("空")
+	}
 
-	//付款回执
-	//encryptCartID,_:=booking.Redisclient.Get("encryptCartID").Result()
-	//encryptPaypalOrderID,_:=booking.Redisclient.Get("encryptPaypalOrderID").Result()
-	//booking.YesPaypalPayResponse(encryptCartID, encryptPaypalOrderID, encryptPaypalOrderID)
 }
 
 func bookYes24(day string, idPerf string) booking.PaypalUrl {
@@ -51,14 +58,14 @@ func bookYes24(day string, idPerf string) booking.PaypalUrl {
 		if len(blocks) > 0 {
 			pidSeat, class := booking.YesQuerySeat(times.IdTime, times.IdHall, blocks[0])
 			logging.Info("选择的座位：" + pidSeat)
-			code, message, err := booking.YesQueryLock(times.IdTime, pidSeat, blocks[0])
-			if err != nil {
-				logging.Error(err)
-				continue
-			}
-			if code != "None" || message != "요청하신 작업이 정상적으로 처리 되었습니다" {
-				continue
-			}
+			//code, message, err := booking.YesQueryLock(times.IdTime, pidSeat, blocks[0])
+			//if err != nil {
+			//	logging.Error(err)
+			//	continue
+			//}
+			//if code != "None" || message != "요청하신 작업이 정상적으로 처리 되었습니다" {
+			//	continue
+			//}
 			pSeat, price, err := booking.YesQuerySeatFlashEnd(times.IdTime, class)
 			if err != nil {
 				logging.Error(err)
