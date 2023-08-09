@@ -11,30 +11,34 @@ import (
 	"fmt"
 )
 
-var Bs = []booking.BlockInfo{{"101", "GROUND석", ""}, {"102", "GROUND석", ""}, {"103", "GROUND석", ""}, {"104", "GROUND석", ""}, {"105", "GROUND석", ""}, {"106", "GROUND석", ""}, {"107", "GROUND석", ""},
-	{"108", "GROUND석", ""}, {"109", "GROUND석", ""}, {"110", "GROUND석", ""}, {"111", "GROUND석", ""}, {"112", "GROUND석", ""}, {"113", "GROUND석", ""}, {"114", "GROUND석", ""}, {"115", "GROUND석", ""}, {"116", "GROUND석", ""}, {"117", "GROUND석", ""}, {"118", "GROUND석", ""}, {"119", "GROUND석", ""}, {"120", "GROUND석", ""}, {"121", "GROUND석", ""}, {"120", "GROUND석", ""}, {"121", "GROUND석", ""}, {"122", "GROUND석", ""}, {"123", "GROUND석", ""}, {"124", "GROUND석", ""}, {"125", "GROUND석", ""},
-	{"201", "2층지정석", ""}, {"202", "2층지정석", ""}, {"203", "2층지정석", ""}, {"204", "2층지정석", ""}, {"205", "2층지정석", ""}, {"206", "2층지정석", ""}, {"207", "2층지정석", ""}, {"208", "2층지정석", ""}, {"209", "2층지정석", ""}, {"210", "2층지정석", ""}, {"211", "2층지정석", ""}, {"212", "2층지정석", ""}, {"213", "2층지정석", ""}, {"214", "2층지정석", ""}, {"215", "2층지정석", ""}, {"216", "2층지정석", ""}, {"217", "2층지정석", ""}, {"218", "2층지정석", ""}, {"219", "2층지정석", ""}, {"220", "2층지정석", ""},
-	{"221", "2층지정석", ""}, {"222", "2층지정석", ""}, {"223", "2층지정석", ""}, {"224", "2층지정석", ""}, {"225", "2층지정석", ""}}
+var Bs = []booking.BlockInfo{
+	//{"101", "GROUND석", ""}, {"102", "GROUND석", ""},{"106", "GROUND석", ""},
+	{"103", "GROUND석", ""}, {"104", "GROUND석", ""}, {"105", "GROUND석", ""}, {"107", "GROUND석", ""}, {"111", "GROUND석", ""}, {"112", "GROUND석", ""}, {"113", "GROUND석", ""}, {"114", "GROUND석", ""}, {"119", "GROUND석", ""}, {"120", "GROUND석", ""}, {"121", "GROUND석", ""}, {"122", "GROUND석", ""}, {"123", "GROUND석", ""},
+	//{"108", "GROUND석", ""}, {"109", "GROUND석", ""}, {"110", "GROUND석", ""},  {"115", "GROUND석", ""}, {"116", "GROUND석", ""}, {"117", "GROUND석", ""}, {"118", "GROUND석", ""}, {"121", "GROUND석", ""}, {"122", "GROUND석", ""}, {"124", "GROUND석", ""}, {"125", "GROUND석", ""},
+	//{"209", "2층지정석", ""}, {"210", "2층지정석", ""}, {"211", "2층지정석", ""}, {"212", "2층지정석", ""}, {"213", "2층지정석", ""}, {"214", "2층지정석", ""}, {"215", "2층지정석", ""}, {"216", "2층지정석", ""}, {"217", "2층지정석", ""}, {"218", "2층지정석", ""}, {"219", "2층지정석", ""}, {"220", "2층지정석", ""},
+	//{"221", "2층지정석", ""},
+}
 
 //var Bs =[]booking.BlockInfo{{"3","S석",""},{"1","S석",""}}
 func main() {
 	booking.InitRedis()
-	var url booking.PaypalUrl
-	//
+	//var url booking.PaypalUrl
+	////
 	//for {
-	//	url = book("20230826", "46706")
-	//	url := bookYes24("20230812", "46560")
+	//	//url = book("20230826", "46706")
+	//	url = bookYes24("20230812", "46560")
 	//	if len(url.EncryptPaypalOrderID) > 0 {
 	//		fmt.Println(url)
 	//		break
 	//	}
 	//	time.Sleep(time.Duration(1) * time.Second)
 	//}
-	url = book("20230826", "46706")
-	cmd := booking.Redisclient.Set("encryptCartID", url.EncryptCartID, time.Duration(60)*time.Second)
-	fmt.Println(cmd.Err(), url.EncryptCartID)
-	c := booking.Redisclient.Set("encryptPaypalOrderID", url.EncryptPaypalOrderID, time.Duration(60)*time.Second)
-	fmt.Println(c.Err(), url.EncryptPaypalOrderID)
+	book("20230826", "46706")
+	//url = bookYes24("20230813", "46560")
+	//cmd := booking.Redisclient.Set("encryptCartID", url.EncryptCartID, time.Duration(60)*time.Second)
+	//fmt.Println(cmd.Err(), url.EncryptCartID)
+	//c := booking.Redisclient.Set("encryptPaypalOrderID", url.EncryptPaypalOrderID, time.Duration(60)*time.Second)
+	//fmt.Println(c.Err(), url.EncryptPaypalOrderID)
 	//payPal()
 
 }
@@ -92,6 +96,7 @@ func bookYes24(day string, idPerf string) booking.PaypalUrl {
 				continue
 			}
 			if len(payData.PaymentRedirectUrl) != 0 {
+				fmt.Println(payData)
 				break
 			}
 
@@ -123,16 +128,15 @@ func book(day string, idPerf string) booking.PaypalUrl {
 }
 
 func wgBooking(idPerf string, pIdTime string, pCntClass string, idHall string, block string, wg *sync.WaitGroup) {
-	fmt.Println(block)
+	pSeat, price, err := booking.YesQuerySeatFlashEnd(pIdTime, pCntClass)
+	if err != nil {
+		return
+	}
 	for {
-		pSeat, price, err := booking.YesQuerySeatFlashEnd(pIdTime, pCntClass)
-		if err != nil {
-			return
-		}
 		amountPrice, _ := strconv.Atoi(price)
 		pidSeat, _ := booking.YesQuerySeat(pIdTime, idHall, block)
 
-		fmt.Println(pidSeat, amountPrice)
+		//fmt.Println(pidSeat, amountPrice)
 
 		if len(pidSeat) > 0 {
 			payData, err := booking.YesGetCart(idPerf, pidSeat, pIdTime, pSeat, amountPrice+3000)
@@ -141,16 +145,20 @@ func wgBooking(idPerf string, pIdTime string, pCntClass string, idHall string, b
 				continue
 			}
 			if len(payData.EncryptPaypalOrderID) > 0 {
-				fmt.Println(block)
-				logging.Info(payData)
 				fmt.Println(payData)
+				logging.Info(block)
+				logging.Info(payData)
+				cmd := booking.Redisclient.Set("encryptCartID", payData.EncryptCartID, time.Duration(60)*time.Second)
+				fmt.Println(cmd.Err(), payData.EncryptCartID)
+				c := booking.Redisclient.Set("encryptPaypalOrderID", payData.EncryptPaypalOrderID, time.Duration(60)*time.Second)
+				fmt.Println(c.Err(), payData.EncryptPaypalOrderID)
 				break
 
 			} else {
 				continue
 			}
 		}
-		time.Sleep(time.Duration(10) * time.Second)
+		time.Sleep(time.Duration(5) * time.Second)
 	}
 	wg.Done()
 	return
